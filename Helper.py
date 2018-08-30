@@ -80,3 +80,77 @@ def Get_Sentences(positive, negative) :
 
     return sentences
 
+def Sentence2Word(line) :
+    result, temp, word = [], [], ""
+
+    for c in line :
+        if c == ' ' :
+            if len(word) > 0 and not english(word) :
+                temp.append(word)
+            word = ""
+        elif c in line_ending :
+            if len(word) > 0 and not english(word) :
+                temp.append(word)
+            if len(temp) > 0 :
+                for t in temp :
+                    result.append(t)
+            word = ""
+            temp.clear()
+        elif c in punctuation :
+            if len(word) > 0 and not english(word):
+                temp.append(word)
+            word = ""
+        else :
+            word += c
+
+    if len(temp) > 0 :
+        for t in temp :
+            result.append(t)
+
+    return result
+
+positive_docs = 3681
+negative_docs = 4500
+testing_docs = 2000
+max_review_length = 311
+zeros = [0 for i in range(5)]
+
+def Get_Data(mark, positive, negative, model) :
+    pl, pr, nl, nr = 0, 0, 0, 0
+    if mark == 0 :
+        pl, pr, nl, nr = 0, testing_docs, 0, testing_docs
+    if mark == 1 :
+        pl, pr, nl, nr = testing_docs, len(positive), testing_docs, len(negative)
+
+    cur, temp = [], []
+    X, Y = [], []
+    for i in range(pl, pr) :
+        words = Sentence2Word(positive[i])
+        temp.clear()
+        for w in words :
+            cur.clear()
+            for val in model[w] :
+                cur.append(val)
+            # temp.append(cur)
+            temp.append(model[w])
+        padding = max_review_length - len(temp)
+        for j in range(padding) :
+            temp.append(zeros)
+        X.append(temp)
+        Y.append(1)
+    for i in range(nl, nr) :
+        words = Sentence2Word(negative[i])
+        temp.clear()
+        for w in words :
+            cur.clear()
+            for val in model[w] :
+                cur.append(val)
+            # temp.append(cur)
+            temp.append(model[w])
+        padding = max_review_length - len(temp)
+        for j in range(padding) :
+            temp.append(zeros)
+        X.append(temp)
+        Y.append(0)
+
+    return X, Y

@@ -7,7 +7,6 @@ def Do_Word2Vec(sentences) :
     model = wv(sentences, size=5, min_count=1)
     model.save(modelPath)
 
-    print(model.similarity('মেসি', 'নেইমার'))
-    print(model['নেইমার'])
+    return model
 
 
